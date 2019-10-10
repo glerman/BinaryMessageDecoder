@@ -1,0 +1,20 @@
+*.iml
+*.iws
+*.ipr
+*.log
+*.csv
+**/metastore_db/*
+**/target/
+**/.classpath
+**/.project
+**/.settings
+**/.idea
+# System Files
+.DS_Store
+Thumbs.db
+##Node ignores
+/tmp
+/out-tsc
+dist/
+# dependencies
+node_modules
