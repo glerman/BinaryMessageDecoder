@@ -7,10 +7,13 @@ import java.nio.file.Path;
 
 public class InputReader {
 
-  public InputReader() {
+  private String filePath;
+
+  public InputReader(final String filePath) {
+    this.filePath = filePath;
   }
 
-  public byte[] read(final String filePath) throws IOException {
+  public byte[] read() throws IOException {
 
     Path path = FileSystems.getDefault().getPath(filePath);
     System.out.println("Reading file: " + path.toString());

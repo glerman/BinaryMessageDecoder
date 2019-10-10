@@ -1,8 +1,8 @@
 package com.tectonic.domain;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+
 //todo: make getters immutable?
 public class Block implements Comparable<Block> {
 
