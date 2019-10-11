@@ -7,15 +7,17 @@ import java.util.Objects;
 
 public class RawBlock implements Comparable<RawBlock> {
   public final int offset;
-  public final int payloadOffset;
+  public final Integer payloadOffset;
+  public final Integer payloadLength;
   public final int length;
   private final List<Integer> pointers;
 
-  public RawBlock(final int offset, final int length, final List<Integer> pointers, final int payloadOffset) {
+  public RawBlock(final int offset, final int length, final List<Integer> pointers, final Integer payloadOffset) {
     this.offset = offset;
     this.length = length;
     this.pointers = pointers;
     this.payloadOffset = payloadOffset;
+    payloadLength = payloadOffset == null ? null : offset + length - payloadOffset;
   }
 
   public int compareTo(final RawBlock other) {
