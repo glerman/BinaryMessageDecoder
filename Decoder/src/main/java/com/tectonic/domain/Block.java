@@ -3,7 +3,7 @@ package com.tectonic.domain;
 import java.util.List;
 import java.util.Objects;
 
-//todo: make getters immutable?
+//todo: remove?
 public class Block implements Comparable<Block> {
 
   private final int offset;

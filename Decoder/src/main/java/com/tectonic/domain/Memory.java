@@ -4,12 +4,12 @@ import java.util.List;
 
 public class Memory {
 
-  private List<Block> reachableBlocks;
-  private List<Block> unreachableBlocks;
+  private List<RawBlock> reachableBlocks;
+  private List<RawBlock> unreachableBlocks;
 //  private Block[] initBlockOrder; required?
-  private Block root;
+  private RawBlock root;
 
-  public Memory(final List<Block> reachableBlocks, final List<Block> unreachableBlocks, final Block root) {
+  public Memory(final List<RawBlock> reachableBlocks, final List<RawBlock> unreachableBlocks, final RawBlock root) {
     this.reachableBlocks = reachableBlocks;
     this.unreachableBlocks = unreachableBlocks;
     this.root = root;
