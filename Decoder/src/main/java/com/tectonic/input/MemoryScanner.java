@@ -52,25 +52,54 @@ public class MemoryScanner {
 
   public Memory scan() {
 
-    final List<RawBlock> reachables = findReachableBlocksOrdered();
-    final List<RawBlock> unreachableBlocks = findUnreachableBlocks(reachables);
-    return new Memory(reachables, unreachableBlocks, reachables.get(0));
+    final List<RawBlock> reachablesSorted = findReachableBlocksSorted();
+    assert reachablesSorted.size() > 0 : "Must contain root block";
+    final List<RawBlock> unreachableBlocks = findUnreachableBlocks(reachablesSorted);
+
+    return new Memory(reachablesSorted, unreachableBlocks, reachablesSorted.get(0));
   }
 
-  private List<RawBlock> findUnreachableBlocks(final List<RawBlock> reachables) {
+  private List<RawBlock> findUnreachableBlocks(final List<RawBlock> reachablesSorted) {
     List<RawBlock> unreachables = new ArrayList<>();
-    RawBlock curr;
-    RawBlock next;
-    for(int i = 0; i < reachables.size() - 1; i++) {
-      curr = reachables.get(i);
-      next = reachables.get(i + 1);
-      if (curr.offset + curr.length < next.offset) {
-        //todo
-        //there are unreachable block(s) in between
-        //add them to unreachable
+    RawBlock currReachable;
+    RawBlock nextReachable;
+
+    //Find unreachable between reachable
+    for(int i = 0; i < reachablesSorted.size() - 1; i++) {
+      currReachable = reachablesSorted.get(i);
+      nextReachable = reachablesSorted.get(i + 1);
+      int expectedNextReachableOffset = currReachable.offset + currReachable.length;
+
+      if (expectedNextReachableOffset < nextReachable.offset) {
+        RawBlock unreachable = scanBlock(expectedNextReachableOffset);
+        unreachables.add(unreachable);
+        int nextOffset = unreachable.offset + unreachable.length;
+
+        while (nextOffset < nextReachable.offset) {
+          unreachable = scanBlock(nextOffset);
+          unreachables.add(unreachable);
+          nextOffset = unreachable.offset + unreachable.length;
+        }
+        assert nextOffset == nextReachable.offset;
+      } else {
+        assert expectedNextReachableOffset == nextReachable.offset;
       }
     }
+    //Find unreachable after reachable
+    int offset = totalBlocksLength(reachablesSorted, unreachables);
+
+    while (offset < data.length) {
+      RawBlock unreachable = scanBlock(offset);
+      unreachables.add(unreachable);
+      offset += unreachable.length;
+    }
+    assert offset == data.length : "Entire memory needs to be scanned";
     return unreachables;
+  }
+
+  private int totalBlocksLength(List<RawBlock> x, List<RawBlock> y) {
+    return x.stream().mapToInt(b -> b.length).sum() +
+            y.stream().mapToInt(b -> b.length).sum();
   }
 
   private RawBlock scanBlock(final int offset) {
@@ -105,7 +134,7 @@ public class MemoryScanner {
   }
 
   //scan the data array BFS/DFS
-  private List<RawBlock> findReachableBlocksOrdered() {
+  private List<RawBlock> findReachableBlocksSorted() {
 
     List<RawBlock> reachables = dfs();
     Collections.sort(reachables);
