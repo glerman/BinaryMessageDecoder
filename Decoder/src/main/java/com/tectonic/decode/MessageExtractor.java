@@ -21,7 +21,7 @@ public class MessageExtractor {
   private char[] extractBlockPayload(final RawBlock block) {
     char[] payload = new char[block.payloadLength];
     for (int i = block.payloadOffset; i< block.payloadLength; i++) {
-      payload[i] = (char) memory.data[block.payloadOffset + i];
+      payload[i] = (char) memory.data[i];
     }
     return payload;
   }
