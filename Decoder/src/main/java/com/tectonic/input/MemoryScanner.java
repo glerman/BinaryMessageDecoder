@@ -15,6 +15,48 @@ public class MemoryScanner {
     this.data = data;
   }
 
+  public static void main(String[] args) {
+    byte[] bytes = {(byte)0B10101100, (byte)0B00000010};
+    MemoryScanner memoryScanner = new MemoryScanner(bytes);
+    int val = memoryScanner.decodeVarint();
+    System.out.println((byte)0B10000000 & (byte) 0B11000000);
+    System.out.println(((byte)0B10000000 & (byte) 0B10101100) == (byte)0B10000000);
+    System.out.println(val);
+  }
+
+  class RawBlock {
+    private final int offset;
+    private final int length;
+    private final List<Integer> pointerOffsets;
+    private final byte[] payload;
+
+    public RawBlock(final int offset, final int length, final List<Integer> pointerOffsets, final byte[] payload) {
+      this.offset = offset;
+      this.length = length;
+      this.pointerOffsets = pointerOffsets;
+      this.payload = payload;
+    }
+  }
+
+  int decodeVarint() {
+    byte moreMask = (byte) 0B10000000;
+    byte varIntValueMask = (byte) 0B01111111;
+    List<Byte> varIntValueBytes = new ArrayList<>();
+    boolean hasMore = true;
+    int curr = 0;
+    while (hasMore) {
+      hasMore = (data[curr] & moreMask) == moreMask;
+      varIntValueBytes.add((byte)(data[curr] & varIntValueMask));
+      curr++;
+    }
+    Collections.reverse(varIntValueBytes);
+    int value = 0;
+    for (int i = 0; i < varIntValueBytes.size(); i++) {
+      value += ((int)varIntValueBytes.get(i)) << 8*i;
+    }
+    return value;
+  }
+
   public Memory scan() {
 
     final List<Block> reachables = findReachableBlocksOrdered();
