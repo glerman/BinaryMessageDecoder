@@ -2,6 +2,7 @@ package com.tectonic.input;
 
 import com.tectonic.domain.Block;
 import com.tectonic.domain.Memory;
+import com.tectonic.domain.VarInt;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,10 +19,10 @@ public class MemoryScanner {
   public static void main(String[] args) {
     byte[] bytes = {(byte)0B10101100, (byte)0B00000010};
     MemoryScanner memoryScanner = new MemoryScanner(bytes);
-    int val = memoryScanner.decodeVarint();
+    VarInt varint = memoryScanner.decodeVarint(0);
     System.out.println((byte)0B10000000 & (byte) 0B11000000);
     System.out.println(((byte)0B10000000 & (byte) 0B10101100) == (byte)0B10000000);
-    System.out.println(val);
+    System.out.println(varint);
   }
 
   class RawBlock {
@@ -38,15 +39,15 @@ public class MemoryScanner {
     }
   }
 
-  int decodeVarint() {
+  VarInt decodeVarint(final int offset) {
     byte moreMask = (byte) 0B10000000;
     byte varIntValueMask = (byte) 0B01111111;
     List<Byte> varIntValueBytes = new ArrayList<>();
     boolean hasMore = true;
     int curr = 0;
     while (hasMore) {
-      hasMore = (data[curr] & moreMask) == moreMask;
-      varIntValueBytes.add((byte)(data[curr] & varIntValueMask));
+      hasMore = (data[offset + curr] & moreMask) == moreMask;
+      varIntValueBytes.add((byte)(data[offset + curr] & varIntValueMask));
       curr++;
     }
     Collections.reverse(varIntValueBytes);
@@ -54,7 +55,7 @@ public class MemoryScanner {
     for (int i = 0; i < varIntValueBytes.size(); i++) {
       value += ((int)varIntValueBytes.get(i)) << 8*i;
     }
-    return value;
+    return new VarInt(value, varIntValueBytes.size());
   }
 
   public Memory scan() {
