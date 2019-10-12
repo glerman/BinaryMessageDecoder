@@ -26,9 +26,22 @@ public class MemoryScanner {
     System.out.println(((byte)0B10000000 & (byte) 0B10101100) == (byte)0B10000000);
     System.out.println(varint);
 
-    byte[] b2 = {0};
-    VarInt varint2 = new MemoryScanner(b2).decodeVarint(0);
+    byte[] b0 = {0};
+    VarInt varint2 = new MemoryScanner(b0).decodeVarint(0);
     System.out.println(varint2);
+
+    byte[] b7 = {7};
+    VarInt varin7 = new MemoryScanner(b7).decodeVarint(0);
+    System.out.println(varin7);
+
+    byte[] b1 = {(byte)0b01111111};
+    VarInt varin1 = new MemoryScanner(b1).decodeVarint(0);
+    System.out.println(varin1); //127
+
+    byte[] b3 = {(byte)0b10000000, (byte)0b00000001};
+    VarInt varin3 = new MemoryScanner(b3).decodeVarint(0);
+    System.out.println(varin3); //26
+
   }
 
   VarInt decodeVarint(final int offset) {
@@ -42,10 +55,10 @@ public class MemoryScanner {
       varIntValueBytes.add((byte)(data[offset + curr] & varIntValueMask));
       curr++;
     }
-    Collections.reverse(varIntValueBytes);
+    assert varIntValueBytes.size() <= 8 : "A varint has 8 bytes at most";
     int value = 0;
     for (int i = 0; i < varIntValueBytes.size(); i++) {
-      value += ((int)varIntValueBytes.get(i)) << 8*i;
+      value += ((long)varIntValueBytes.get(i)) << 7*i;
     }
     return new VarInt(value, varIntValueBytes.size());
   }
@@ -56,7 +69,7 @@ public class MemoryScanner {
     assert reachablesSorted.size() > 0 : "Must contain root block";
     final List<RawBlock> unreachableBlocks = findUnreachableBlocks(reachablesSorted);
 
-    return new Memory(reachablesSorted, unreachableBlocks, reachablesSorted.get(0));
+    return new Memory(data, reachablesSorted, unreachableBlocks, reachablesSorted.get(0));
   }
 
   private List<RawBlock> findUnreachableBlocks(final List<RawBlock> reachablesSorted) {
