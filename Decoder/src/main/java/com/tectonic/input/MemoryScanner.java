@@ -1,5 +1,6 @@
 package com.tectonic.input;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.tectonic.domain.Memory;
 import com.tectonic.domain.RawBlock;
 import com.tectonic.domain.VarInt;
@@ -44,9 +45,10 @@ public class MemoryScanner {
 
   }
 
+  @VisibleForTesting
   VarInt decodeVarint(final int offset) {
-    byte moreMask = (byte) 0B10000000;
-    byte varIntValueMask = (byte) 0B01111111;
+    byte moreMask = (byte) 0B1000_0000;
+    byte varIntValueMask = (byte) 0B0111_1111;
     List<Byte> varIntValueBytes = new ArrayList<>();
     boolean hasMore = true;
     int curr = 0;
@@ -148,7 +150,8 @@ public class MemoryScanner {
   }
 
   //scan the data array BFS/DFS
-  private List<RawBlock> findReachableBlocksSorted() {
+  @VisibleForTesting
+  List<RawBlock> findReachableBlocksSorted() {
 
     List<RawBlock> reachables = dfs();
     Collections.sort(reachables);
