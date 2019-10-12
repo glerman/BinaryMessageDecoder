@@ -10,14 +10,14 @@ public class RawBlock implements Comparable<RawBlock> {
   public final Integer payloadOffset;
   public final Integer payloadLength;
   public final int length;
-  private final List<Integer> pointers;
+  private final List<VarInt> pointers;
 
-  public RawBlock(final int offset, final int length, final List<Integer> pointers, final Integer payloadOffset) {
+  public RawBlock(final int offset, final int length, final List<VarInt> pointers, final Integer payloadOffset) {
     this.offset = offset;
     this.length = length;
     this.pointers = pointers;
     this.payloadOffset = payloadOffset;
-    payloadLength = payloadOffset == null ? null : offset + length - payloadOffset;
+    payloadLength = payloadOffset == null ? null : length - payloadOffset;
   }
 
   public int compareTo(final RawBlock other) {
@@ -37,7 +37,19 @@ public class RawBlock implements Comparable<RawBlock> {
     return Objects.hash(offset);
   }
 
-  public List<Integer> getPointers() {
+  public List<VarInt> getPointers() {
     return ImmutableList.copyOf(pointers);
   }
+
+//  @Override
+//  public String toString() {
+//    final StringBuilder sb = new StringBuilder("RawBlock{");
+//    sb.append("offset=").append(offset);
+//    sb.append(", payloadOffset=").append(payloadOffset);
+//    sb.append(", payloadLength=").append(payloadLength);
+//    sb.append(", length=").append(length);
+//    sb.append(", pointers=").append(pointers);
+//    sb.append('}');
+//    return sb.toString();
+//  }
 }

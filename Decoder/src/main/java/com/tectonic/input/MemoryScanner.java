@@ -120,29 +120,30 @@ public class MemoryScanner {
 
     if (blockLength.value == blockLength.length) { //empty block: no pointers or payload.
       assert blockLength.value == 1 : "Expecting the length of an empty block to be 1";
-      return new RawBlock(offset, blockLength.length, Collections.emptyList(), -1);
+      return new RawBlock(offset, blockLength.value, Collections.emptyList(), null);
     }
     int scannedLength = blockLength.length;
 
-    List<Integer> pointers = new ArrayList<>();
+    List<VarInt> pointers = new ArrayList<>();
 
     //scan pointers until we reach the zero byte, or the end of block (may not be a zero byte if there's no payload)
     while (scannedLength < blockLength.value) {
       VarInt pointer = decodeVarint(offset + scannedLength);
       scannedLength += pointer.length;
       if (pointer.value == 0) { //optional zero byte reached
+        assert pointer.length == 1;
         break;
       }
-      pointers.add(pointer.value);
+      pointers.add(pointer);
     }
     if (scannedLength == blockLength.value) { //block has pointers but no payload
-      return new RawBlock(offset, blockLength.length, pointers, -1);
+      return new RawBlock(offset, blockLength.value, pointers, null);
 
     } else if (scannedLength < blockLength.value) { //block has payload and (maybe) pointers
-      return new RawBlock(offset, blockLength.length, pointers, scannedLength);
+      return new RawBlock(offset, blockLength.value, pointers, scannedLength);
 
     } else {
-      throw new IllegalStateException("scan block scanned more than block size");
+      throw new IllegalStateException("Scanned more than block size for block at offset " + offset);
     }
   }
 
@@ -167,9 +168,9 @@ public class MemoryScanner {
     RawBlock currBlock = scanBlock(offset);
     reachables.add(currBlock);
 
-    for (int pointer : currBlock.getPointers()) {
-      if (!visitedOffsets.contains(pointer)) {
-        dfsRecursive(pointer, visitedOffsets, reachables);
+    for (VarInt pointer : currBlock.getPointers()) {
+      if (!visitedOffsets.contains(pointer.value)) {
+        dfsRecursive(pointer.value, visitedOffsets, reachables);
       }
     }
   }
