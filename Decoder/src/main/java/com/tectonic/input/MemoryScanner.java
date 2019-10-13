@@ -69,6 +69,7 @@ public class MemoryScanner {
 
     final List<RawBlock> reachablesSorted = findReachableBlocksSorted();
     assert reachablesSorted.size() > 0 : "Must contain root block";
+    assert reachablesSorted.stream().mapToInt(b -> b.length).sum() <= data.length : "Reachable blocks length can't more more than memory length";
     final List<RawBlock> unreachableBlocks = findUnreachableBlocks(reachablesSorted);
 
     return new Memory(data, reachablesSorted, unreachableBlocks, reachablesSorted.get(0));
@@ -108,7 +109,7 @@ public class MemoryScanner {
       unreachables.add(unreachable);
       offset += unreachable.length;
     }
-    assert offset == data.length : "Entire memory needs to be scanned";
+    assert offset == data.length : "Entire memory needs to be scanned. Scanned " + offset;
     return unreachables;
   }
 

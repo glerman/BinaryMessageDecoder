@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class RawBlock implements Comparable<RawBlock> {
   public final int offset;
@@ -39,6 +40,10 @@ public class RawBlock implements Comparable<RawBlock> {
 
   public List<VarInt> getPointers() {
     return ImmutableList.copyOf(pointers);
+  }
+
+  public List<Integer> getPointerIntegers() {
+    return pointers.stream().map(varInt -> varInt.value).collect(Collectors.toList());
   }
 
 //  @Override

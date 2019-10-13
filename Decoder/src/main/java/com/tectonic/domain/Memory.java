@@ -22,4 +22,12 @@ public class Memory {
   public List<RawBlock> getUnreachableBlocks() {
     return ImmutableList.copyOf(unreachableBlocks);
   }
+
+  public List<RawBlock> getReachableBlocks() {
+    return reachableBlocks;
+  }
+
+  public int blockCount() {
+    return reachableBlocks.size() + unreachableBlocks.size();
+  }
 }
