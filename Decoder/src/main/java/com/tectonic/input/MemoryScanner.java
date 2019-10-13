@@ -19,32 +19,6 @@ public class MemoryScanner {
     this.data = data;
   }
 
-  public static void main(String[] args) {
-    byte[] bytes = {(byte)0B10101100, (byte)0B00000010};
-    MemoryScanner memoryScanner = new MemoryScanner(bytes);
-    VarInt varint = memoryScanner.decodeVarint(0);
-    System.out.println((byte)0B10000000 & (byte) 0B11000000);
-    System.out.println(((byte)0B10000000 & (byte) 0B10101100) == (byte)0B10000000);
-    System.out.println(varint);
-
-    byte[] b0 = {0};
-    VarInt varint2 = new MemoryScanner(b0).decodeVarint(0);
-    System.out.println(varint2);
-
-    byte[] b7 = {7};
-    VarInt varin7 = new MemoryScanner(b7).decodeVarint(0);
-    System.out.println(varin7);
-
-    byte[] b1 = {(byte)0b01111111};
-    VarInt varin1 = new MemoryScanner(b1).decodeVarint(0);
-    System.out.println(varin1); //127
-
-    byte[] b3 = {(byte)0b10000000, (byte)0b00000001};
-    VarInt varin3 = new MemoryScanner(b3).decodeVarint(0);
-    System.out.println(varin3); //26
-
-  }
-
   @VisibleForTesting
   VarInt decodeVarint(final int offset) {
     byte moreMask = (byte) 0B1000_0000;
@@ -69,7 +43,7 @@ public class MemoryScanner {
 
     final List<RawBlock> reachablesSorted = findReachableBlocksSorted();
     assert reachablesSorted.size() > 0 : "Must contain root block";
-    assert reachablesSorted.stream().mapToInt(b -> b.length).sum() <= data.length : "Reachable blocks length can't more more than memory length";
+    assert reachablesSorted.stream().mapToInt(b -> b.length).sum() <= data.length : "Reachable blocks length can't be more than memory length";
     final List<RawBlock> unreachableBlocks = findUnreachableBlocks(reachablesSorted);
 
     return new Memory(data, reachablesSorted, unreachableBlocks, reachablesSorted.get(0));
@@ -151,8 +125,7 @@ public class MemoryScanner {
   }
 
   //scan the data array BFS/DFS
-  @VisibleForTesting
-  List<RawBlock> findReachableBlocksSorted() {
+  private List<RawBlock> findReachableBlocksSorted() {
 
     List<RawBlock> reachables = dfs();
     Collections.sort(reachables);

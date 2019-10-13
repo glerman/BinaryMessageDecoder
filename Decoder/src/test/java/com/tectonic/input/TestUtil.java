@@ -1,8 +1,6 @@
 package com.tectonic.input;
 
 
-import com.tectonic.domain.RawBlock;
-
 import java.util.List;
 
 @SuppressWarnings("ForLoopReplaceableByForEach")
@@ -62,6 +60,20 @@ class TestUtil {
       block[currOffset] = 0;
     }
     return block;
+  }
+
+  static byte[] encodeMemory(final List<byte[]> blocks) {
+    int size = blocks.stream().mapToInt(block -> block.length).sum();
+    byte[] data = new byte[size];
+    int currOffset = 0;
+
+    for (int i=0; i < blocks.size(); i++) {
+      byte[] block = blocks.get(i);
+      for (int j = 0; j < block.length; j++) {
+        data[currOffset++] = block[j];
+      }
+    }
+    return data;
   }
 
 
