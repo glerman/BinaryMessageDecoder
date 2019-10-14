@@ -17,6 +17,7 @@ public class VarIntDecodeTest {
 
   @Test
   public void testEncodeDecode() throws Exception {
+    Assert.assertEquals(4, new MemoryScanner(TestUtil.encodeVarInt(4)).decodeVarint(0).value);
     Assert.assertEquals(8, new MemoryScanner(TestUtil.encodeVarInt(8)).decodeVarint(0).value);
     Assert.assertEquals(64, new MemoryScanner(TestUtil.encodeVarInt(64)).decodeVarint(0).value);
     Assert.assertEquals(300, new MemoryScanner(TestUtil.encodeVarInt(300)).decodeVarint(0).value);

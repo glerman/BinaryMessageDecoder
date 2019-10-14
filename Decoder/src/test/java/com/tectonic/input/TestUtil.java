@@ -4,7 +4,7 @@ package com.tectonic.input;
 import java.util.List;
 
 @SuppressWarnings("ForLoopReplaceableByForEach")
-public class TestUtil {
+class TestUtil {
 
   static byte[] encodeVarInt(final long x) {
     byte moreMask = (byte) 0b1000_0000;
@@ -32,10 +32,15 @@ public class TestUtil {
     return 1 + (i-1)/7;
   }
 
-  public static byte[] encodeBlock(final int length, List<Integer> pointers, byte[] payload, boolean forceZeroByte) {
+  static byte[] encodeBlock(List<Integer> pointers, byte[] payload, boolean forceZeroByte) {
+    int pointerLength = pointers == null ? 0 : pointers.stream().mapToInt(i -> encodeVarInt(i).length).sum();
+    int payloadLength = payload == null ? 0 : payload.length;
+    int zeroByteLength = payload != null || forceZeroByte ? 1 : 0;
+    final int resolvedLength = pointerLength + payloadLength + zeroByteLength + encodeVarInt(pointerLength + payloadLength).length;
+
     int currOffset = 0;
-    byte[] block = new byte[length];
-    byte[] blockLengthVarInt = encodeVarInt(length);
+    byte[] block = new byte[resolvedLength];
+    byte[] blockLengthVarInt = encodeVarInt(resolvedLength);
 
     //Populate length
     for (int i = 0; i < blockLengthVarInt.length; i++) {
@@ -63,7 +68,7 @@ public class TestUtil {
     return block;
   }
 
-  public static byte[] encodeMemory(final List<byte[]> blocks) {
+  static byte[] encodeMemory(final List<byte[]> blocks) {
     int size = blocks.stream().mapToInt(block -> block.length).sum();
     byte[] data = new byte[size];
     int currOffset = 0;

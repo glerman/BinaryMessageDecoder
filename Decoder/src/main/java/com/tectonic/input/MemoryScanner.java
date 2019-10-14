@@ -50,6 +50,9 @@ public class MemoryScanner {
 
   public Memory scan() {
 
+//    List<RawBlock> l = new ArrayList<>();
+//    Lists.newArrayList(24,69,120,156,170,211,214,226,237,248).forEach(offset -> l.add(scanBlock(offset)));
+
     final List<RawBlock> reachablesSorted = findReachableBlocksSorted();
     assert reachablesSorted.size() > 0 : "Must contain root block";
     assert reachablesSorted.stream().mapToInt(b -> b.length).sum() <= data.length : "Reachable blocks length can't be more than memory length";
@@ -140,24 +143,24 @@ public class MemoryScanner {
     return reachables;
   }
 
-  private List<RawBlock> dfs() {
-    Set<Integer> visitedOffsets = new HashSet<>();
-    List<RawBlock> reachables = new ArrayList<>();
-    dfsRecursive(0, visitedOffsets, reachables);
-    return reachables;
-  }
-
-  private void dfsRecursive(int offset, Set<Integer> visitedOffsets, List<RawBlock> reachables) {
-    visitedOffsets.add(offset);
-    RawBlock currBlock = scanBlock(offset);
-    reachables.add(currBlock);
-
-    for (VarInt pointer : currBlock.getPointers()) {
-      if (!visitedOffsets.contains(pointer.value)) {
-        dfsRecursive(pointer.value, visitedOffsets, reachables);
-      }
-    }
-  }
+//  private List<RawBlock> dfs() {
+//    Set<Integer> visitedOffsets = new HashSet<>();
+//    List<RawBlock> reachables = new ArrayList<>();
+//    dfsRecursive(0, visitedOffsets, reachables);
+//    return reachables;
+//  }
+//
+//  private void dfsRecursive(int offset, Set<Integer> visitedOffsets, List<RawBlock> reachables) {
+//    visitedOffsets.add(offset);
+//    RawBlock currBlock = scanBlock(offset);
+//    reachables.add(currBlock);
+//
+//    for (VarInt pointer : currBlock.getPointers()) {
+//      if (!visitedOffsets.contains(pointer.value)) {
+//        dfsRecursive(pointer.value, visitedOffsets, reachables);
+//      }
+//    }
+//  }
 
   private List<RawBlock> dfsWithoutRecursion() {
     List<RawBlock> reachables = new ArrayList<>();
