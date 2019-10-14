@@ -2,6 +2,7 @@ package com.tectonic.input;
 
 import com.google.common.collect.Lists;
 import com.tectonic.domain.Memory;
+import com.tectonic.domain.RawBlock;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -39,6 +40,30 @@ public class MemoryScannerTest {
 
     Assert.assertEquals(Collections.emptyList(), memory.getUnreachableBlocks());
     Assert.assertEquals(2, memory.getReachableBlocks().size());
+  }
+
+  @Test
+  public void testTwoBlocksWithPayload() throws Exception {
+    byte[] payload = new byte[5];
+    List<Integer> pointers = Lists.newArrayList(8);
+    byte[] rootBlock = TestUtil.encodeBlock(8, pointers, payload, false);
+    byte[] secondBlock = TestUtil.encodeBlock(8, pointers, payload, false);
+    byte[] data = TestUtil.encodeMemory(Lists.newArrayList(rootBlock, secondBlock));
+
+    Memory memory = new MemoryScanner(data).scan();
+
+    Assert.assertEquals(memory.data.length, rootBlock.length + secondBlock.length);
+    Assert.assertEquals(memory.root.length, rootBlock.length);
+    Assert.assertEquals(pointers, memory.root.getPointerIntegers());
+    Assert.assertEquals(2, memory.blockCount());
+
+    Assert.assertEquals(Collections.emptyList(), memory.getUnreachableBlocks());
+    Assert.assertEquals(2, memory.getReachableBlocks().size());
+
+    RawBlock actualSecondBlock = memory.getReachableBlocks().get(1);
+    Assert.assertEquals(pointers, actualSecondBlock.getPointerIntegers());
+    Assert.assertEquals(8, actualSecondBlock.offset);
+    Assert.assertEquals(5, actualSecondBlock.payloadLength.intValue());
   }
 
   @Test
