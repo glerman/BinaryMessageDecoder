@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 
 public class MemoryScanner {
 
@@ -25,13 +26,15 @@ public class MemoryScanner {
     byte varIntValueMask = (byte) 0B0111_1111;
     List<Byte> varIntValueBytes = new ArrayList<>();
     boolean hasMore = true;
-    int curr = 0;
+    int currIdx = 0;
     while (hasMore) {
-      hasMore = (data[offset + curr] & moreMask) == moreMask;
-      varIntValueBytes.add((byte)(data[offset + curr] & varIntValueMask));
-      curr++;
+      byte currByte = data[offset + currIdx];
+      hasMore = (currByte & moreMask) == moreMask;
+      varIntValueBytes.add((byte)(currByte & varIntValueMask));
+      currIdx++;
     }
     assert varIntValueBytes.size() <= 8 : "A varint has 8 bytes at most";
+    assert currIdx == varIntValueBytes.size();
     int value = 0;
     for (int i = 0; i < varIntValueBytes.size(); i++) {
       byte byteVal = varIntValueBytes.get(i);
@@ -130,14 +133,12 @@ public class MemoryScanner {
     }
   }
 
-  //scan the data array BFS/DFS
   private List<RawBlock> findReachableBlocksSorted() {
 
-    List<RawBlock> reachables = dfs();
+    List<RawBlock> reachables = dfsWithoutRecursion();
     Collections.sort(reachables);
     return reachables;
   }
-
 
   private List<RawBlock> dfs() {
     Set<Integer> visitedOffsets = new HashSet<>();
@@ -156,6 +157,29 @@ public class MemoryScanner {
         dfsRecursive(pointer.value, visitedOffsets, reachables);
       }
     }
+  }
+
+  private List<RawBlock> dfsWithoutRecursion() {
+    List<RawBlock> reachables = new ArrayList<>();
+    Stack<Integer> stack = new Stack<>();
+    Set<Integer> visitedOffsets = new HashSet<>();
+    stack.push(0);
+
+    while (!stack.isEmpty()) {
+      int offset = stack.pop();
+
+
+      RawBlock currBlock = scanBlock(offset);
+      reachables.add(currBlock);
+
+      for (VarInt pointer : currBlock.getPointers()) {
+        if (!visitedOffsets.contains(pointer.value)) {
+          stack.push(pointer.value);
+        }
+        visitedOffsets.add(pointer.value);
+      }
+    }
+    return reachables;
   }
 
 
