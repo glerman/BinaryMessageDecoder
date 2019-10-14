@@ -18,3 +18,4 @@ Thumbs.db
 dist/
 # dependencies
 node_modules
+memory.bin
