@@ -20,8 +20,8 @@ public class MessageExtractor {
   //todo: we copy the payload. must we?
   private char[] extractBlockPayload(final RawBlock block) {
     char[] payload = new char[block.payloadLength];
-    for (int i = block.payloadOffset; i< block.payloadLength; i++) {
-      payload[i] = (char) memory.data[i];
+    for (int i = 0; i< block.payloadLength; i++) {
+      payload[i] = (char) memory.data[block.offset + block.payloadOffset + i];
     }
     return payload;
   }

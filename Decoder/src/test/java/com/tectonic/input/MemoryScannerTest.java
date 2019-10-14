@@ -1,6 +1,7 @@
 package com.tectonic.input;
 
 import com.google.common.collect.Lists;
+import com.tectonic.decode.MessageExtractor;
 import com.tectonic.domain.Memory;
 import com.tectonic.domain.RawBlock;
 import org.junit.Assert;
@@ -13,15 +14,15 @@ public class MemoryScannerTest {
 
   @Test
   public void testTrivialMemory() throws Exception {
-
-    byte[] rootBlock = TestUtil.encodeBlock(1, null, null, false);
+    byte[] payload = "hello".getBytes();
+    byte[] rootBlock = TestUtil.encodeBlock(7, null, payload, false);
     Memory memory = new MemoryScanner(rootBlock).scan();
 
     Assert.assertEquals(memory.data, rootBlock);
     Assert.assertEquals(memory.root.length, rootBlock.length);
     Assert.assertEquals(Collections.emptyList(), memory.root.getPointers());
-    Assert.assertNull(memory.root.payloadLength);
-    Assert.assertNull(memory.root.payloadOffset);
+    Assert.assertEquals(5, memory.root.payloadLength.intValue());
+    Assert.assertEquals(2, memory.root.payloadOffset.intValue());
   }
 
   @Test
@@ -81,6 +82,10 @@ public class MemoryScannerTest {
 
     Assert.assertEquals(1, memory.getUnreachableBlocks().size());
     Assert.assertEquals(3, memory.getReachableBlocks().size());
+
+    RawBlock actualUnreachable = memory.getUnreachableBlocks().get(0);
+    Assert.assertEquals(5, actualUnreachable.payloadLength.intValue());
+    Assert.assertTrue(actualUnreachable.getPointers().isEmpty());
   }
 
 
@@ -91,7 +96,7 @@ public class MemoryScannerTest {
     byte[] rootBlock = TestUtil.encodeBlock(9, pointers, payload, false);
     byte[] reachable1 = TestUtil.encodeBlock(8, null, payload, false);
     byte[] unreachable = TestUtil.encodeBlock(7, null, payload, false);
-    byte[] reachable2 = TestUtil.encodeBlock(6, null, payload, false);
+    byte[] reachable2 = TestUtil.encodeBlock(7, null, payload, false);
 
     byte[] data = TestUtil.encodeMemory(Lists.newArrayList(rootBlock, reachable1, unreachable, reachable2));
 
@@ -104,5 +109,25 @@ public class MemoryScannerTest {
     Assert.assertEquals(2, actualUnreachable.payloadOffset.intValue());
     Assert.assertEquals(5, actualUnreachable.payloadLength.intValue());
     Assert.assertEquals(3, memory.getReachableBlocks().size());
+  }
+
+  @Test
+  public void testMessageDecode() throws Exception {
+
+    byte[] payload = "hello".getBytes();
+    Assert.assertEquals(5, payload.length);
+    List<Integer> pointers = Lists.newArrayList(3, 12);
+    byte[] rootBlock = TestUtil.encodeBlock(3, pointers, null, false);
+    byte[] reachable1 = TestUtil.encodeBlock(2, null, null, true);
+    byte[] unreachable = TestUtil.encodeBlock(7, null, payload, false);
+    byte[] reachable2 = TestUtil.encodeBlock(2, null, null, true);
+
+    byte[] data = TestUtil.encodeMemory(Lists.newArrayList(rootBlock, reachable1, unreachable, reachable2));
+
+    Memory memory = new MemoryScanner(data).scan();
+
+
+    String message = new MessageExtractor(memory).extract();
+    Assert.assertEquals("hello", message);
   }
 }

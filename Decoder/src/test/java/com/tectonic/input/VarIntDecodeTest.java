@@ -8,7 +8,6 @@ public class VarIntDecodeTest {
   @Test
   public void testRequiredVarIntBytes() throws Exception {
 
-    System.out.println((byte)0b0000_1000);
     Assert.assertEquals(1, TestUtil.requiredVarIntBytes(0));
     Assert.assertEquals(1, TestUtil.requiredVarIntBytes(0b0000_1000));
     Assert.assertEquals(2, TestUtil.requiredVarIntBytes(0b1000_0100));

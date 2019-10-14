@@ -2,7 +2,9 @@ package com.tectonic.domain;
 
 import com.google.common.collect.ImmutableList;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class Memory {
 
@@ -29,5 +31,21 @@ public class Memory {
 
   public int blockCount() {
     return reachableBlocks.size() + unreachableBlocks.size();
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    final Memory memory = (Memory) o;
+    return Arrays.equals(data, memory.data) &&
+            Objects.equals(reachableBlocks, memory.reachableBlocks) &&
+            Objects.equals(unreachableBlocks, memory.unreachableBlocks) &&
+            Objects.equals(root, memory.root);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(data, reachableBlocks, unreachableBlocks, root);
   }
 }

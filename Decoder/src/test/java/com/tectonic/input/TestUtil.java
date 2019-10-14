@@ -4,7 +4,7 @@ package com.tectonic.input;
 import java.util.List;
 
 @SuppressWarnings("ForLoopReplaceableByForEach")
-class TestUtil {
+public class TestUtil {
 
   static byte[] encodeVarInt(final long x) {
     byte moreMask = (byte) 0b1000_0000;
@@ -32,7 +32,7 @@ class TestUtil {
     return 1 + (i-1)/7;
   }
 
-  static byte[] encodeBlock(final int length, List<Integer> pointers, byte[] payload, boolean forceZeroByte) {
+  public static byte[] encodeBlock(final int length, List<Integer> pointers, byte[] payload, boolean forceZeroByte) {
     int currOffset = 0;
     byte[] block = new byte[length];
     byte[] blockLengthVarInt = encodeVarInt(length);
@@ -53,6 +53,7 @@ class TestUtil {
     }
     //Populate payload if not empty
     if (payload != null && payload.length > 0) {
+      block[currOffset++] = 0; //zero byte
       for (int i = 0; i< payload.length; i++) {
         block[currOffset++] = payload[i];
       }
@@ -62,7 +63,7 @@ class TestUtil {
     return block;
   }
 
-  static byte[] encodeMemory(final List<byte[]> blocks) {
+  public static byte[] encodeMemory(final List<byte[]> blocks) {
     int size = blocks.stream().mapToInt(block -> block.length).sum();
     byte[] data = new byte[size];
     int currOffset = 0;

@@ -34,7 +34,13 @@ public class MemoryScanner {
     assert varIntValueBytes.size() <= 8 : "A varint has 8 bytes at most";
     int value = 0;
     for (int i = 0; i < varIntValueBytes.size(); i++) {
-      value += ((long)varIntValueBytes.get(i)) << 7*i;
+      byte byteVal = varIntValueBytes.get(i);
+      assert byteVal >=0;
+
+      long shifted = ((long) byteVal) << 7 * i;
+      assert shifted >=0;
+
+      value += shifted;
     }
     return new VarInt(value, varIntValueBytes.size());
   }
@@ -97,7 +103,7 @@ public class MemoryScanner {
 
     if (blockLength.value == blockLength.length) { //empty block: no pointers or payload.
       assert blockLength.value == 1 : "Expecting the length of an empty block to be 1";
-      return new RawBlock(offset, blockLength.value, Collections.emptyList(), null);
+      return new RawBlock(offset, blockLength, Collections.emptyList(), null);
     }
     int scannedLength = blockLength.length;
 
@@ -114,10 +120,10 @@ public class MemoryScanner {
       pointers.add(pointer);
     }
     if (scannedLength == blockLength.value) { //block has pointers but no payload
-      return new RawBlock(offset, blockLength.value, pointers, null);
+      return new RawBlock(offset, blockLength, pointers, null);
 
     } else if (scannedLength < blockLength.value) { //block has payload and (maybe) pointers
-      return new RawBlock(offset, blockLength.value, pointers, scannedLength);
+      return new RawBlock(offset, blockLength, pointers, scannedLength);
 
     } else {
       throw new IllegalStateException("Scanned more than block size for block at offset " + offset);
