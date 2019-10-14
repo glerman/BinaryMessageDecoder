@@ -82,4 +82,27 @@ public class MemoryScannerTest {
     Assert.assertEquals(1, memory.getUnreachableBlocks().size());
     Assert.assertEquals(3, memory.getReachableBlocks().size());
   }
+
+
+  @Test
+  public void testMiddleBlockUnreachableWithPayloads() throws Exception {
+    byte[] payload = new byte[5];
+    List<Integer> pointers = Lists.newArrayList(9, 24);
+    byte[] rootBlock = TestUtil.encodeBlock(9, pointers, payload, false);
+    byte[] reachable1 = TestUtil.encodeBlock(8, null, payload, false);
+    byte[] unreachable = TestUtil.encodeBlock(7, null, payload, false);
+    byte[] reachable2 = TestUtil.encodeBlock(6, null, payload, false);
+
+    byte[] data = TestUtil.encodeMemory(Lists.newArrayList(rootBlock, reachable1, unreachable, reachable2));
+
+    Memory memory = new MemoryScanner(data).scan();
+
+    Assert.assertEquals(1, memory.getUnreachableBlocks().size());
+    RawBlock actualUnreachable = memory.getUnreachableBlocks().get(0);
+    Assert.assertEquals(7, actualUnreachable.length);
+    Assert.assertEquals(17, actualUnreachable.offset);
+    Assert.assertEquals(2, actualUnreachable.payloadOffset.intValue());
+    Assert.assertEquals(5, actualUnreachable.payloadLength.intValue());
+    Assert.assertEquals(3, memory.getReachableBlocks().size());
+  }
 }
