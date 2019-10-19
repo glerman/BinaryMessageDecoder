@@ -1,6 +1,7 @@
 package com.tectonic.input;
 
 import com.google.common.collect.Lists;
+import com.tectonic.Helper;
 import com.tectonic.domain.Memory;
 import com.tectonic.domain.Block;
 import org.junit.Assert;
@@ -14,7 +15,7 @@ public class MemoryScannerTest {
 
   @Test
   public void testTrivialBlock() throws Exception {
-    byte[] rootBlock = TestUtil.encodeBlock(null, null, false);
+    byte[] rootBlock = Helper.encodeBlock(null, null, false);
     Memory memory = new MemoryScanner(rootBlock).scan();
 
     Assert.assertEquals(1, memory.getReachableBlocks().size());
@@ -26,7 +27,7 @@ public class MemoryScannerTest {
 
   @Test
   public void testTrivialBlockWithZeroByte() throws Exception {
-    byte[] rootBlock = TestUtil.encodeBlock(null, null, true);
+    byte[] rootBlock = Helper.encodeBlock(null, null, true);
     Memory memory = new MemoryScanner(rootBlock).scan();
 
     Assert.assertEquals(1, memory.getReachableBlocks().size());
@@ -39,7 +40,7 @@ public class MemoryScannerTest {
   @Test
   public void testPayLoadBock() throws Exception {
     byte[] payload = "hello".getBytes();
-    byte[] rootBlock = TestUtil.encodeBlock(null, payload, false);
+    byte[] rootBlock = Helper.encodeBlock(null, payload, false);
     Memory memory = new MemoryScanner(rootBlock).scan();
 
     Assert.assertEquals(memory.data, rootBlock);
@@ -54,9 +55,9 @@ public class MemoryScannerTest {
   @Test
   public void testTwoBlocksNoPayload() throws Exception {
     List<Integer> pointers = Lists.newArrayList(2);
-    byte[] rootBlock = TestUtil.encodeBlock(pointers, null, false);
-    byte[] secondBlock = TestUtil.encodeBlock(null, null, false);
-    byte[] data = TestUtil.encodeMemory(Lists.newArrayList(rootBlock, secondBlock));
+    byte[] rootBlock = Helper.encodeBlock(pointers, null, false);
+    byte[] secondBlock = Helper.encodeBlock(null, null, false);
+    byte[] data = Helper.encodeMemory(Lists.newArrayList(rootBlock, secondBlock));
 
     Memory memory = new MemoryScanner(data).scan();
 
@@ -72,9 +73,9 @@ public class MemoryScannerTest {
   public void testTwoBlocksWithPayload() throws Exception {
     byte[] payload = new byte[5];
     List<Integer> pointers = Lists.newArrayList(8);
-    byte[] rootBlock = TestUtil.encodeBlock(pointers, payload, false);
-    byte[] secondBlock = TestUtil.encodeBlock(pointers, payload, false);
-    byte[] data = TestUtil.encodeMemory(Lists.newArrayList(rootBlock, secondBlock));
+    byte[] rootBlock = Helper.encodeBlock(pointers, payload, false);
+    byte[] secondBlock = Helper.encodeBlock(pointers, payload, false);
+    byte[] data = Helper.encodeMemory(Lists.newArrayList(rootBlock, secondBlock));
 
     Memory memory = new MemoryScanner(data).scan();
 
@@ -95,12 +96,12 @@ public class MemoryScannerTest {
 
     String expectedMessage = "hello";
     List<Integer> pointers = Lists.newArrayList(3, 10);
-    byte[] rootBlock = TestUtil.encodeBlock(pointers, null, false);
-    byte[] reachable1 = TestUtil.encodeBlock(null, null, true);
+    byte[] rootBlock = Helper.encodeBlock(pointers, null, false);
+    byte[] reachable1 = Helper.encodeBlock(null, null, true);
     byte[] unreachable = expectedMessage.getBytes();
-    byte[] reachable2 = TestUtil.encodeBlock(null, null, true);
+    byte[] reachable2 = Helper.encodeBlock(null, null, true);
 
-    byte[] data = TestUtil.encodeMemory(Lists.newArrayList(rootBlock, reachable1, unreachable, reachable2));
+    byte[] data = Helper.encodeMemory(Lists.newArrayList(rootBlock, reachable1, unreachable, reachable2));
     Memory memory = new MemoryScanner(data).scan();
 
     Assert.assertEquals(3, memory.getReachableBlocks().size());
@@ -112,11 +113,11 @@ public class MemoryScannerTest {
   public void testMiddleBlockUnreachableWithPayloads() throws Exception {
     byte[] payload = new byte[5];
     List<Integer> pointers = Lists.newArrayList(9, 21);
-    byte[] rootBlock = TestUtil.encodeBlock(pointers, payload, false);
-    byte[] reachable1 = TestUtil.encodeBlock(null, payload, false);
-    byte[] reachable2 = TestUtil.encodeBlock(null, payload, false);
+    byte[] rootBlock = Helper.encodeBlock(pointers, payload, false);
+    byte[] reachable1 = Helper.encodeBlock(null, payload, false);
+    byte[] reachable2 = Helper.encodeBlock(null, payload, false);
 
-    byte[] data = TestUtil.encodeMemory(Lists.newArrayList(rootBlock, reachable1, payload, reachable2));
+    byte[] data = Helper.encodeMemory(Lists.newArrayList(rootBlock, reachable1, payload, reachable2));
 
     Memory memory = new MemoryScanner(data).scan();
 
@@ -138,12 +139,12 @@ public class MemoryScannerTest {
 
 
     String expectedMessage = "hello";
-    byte[] rootBlock = TestUtil.encodeBlock(Lists.newArrayList(6, 15), new byte[2], false);
-    byte[] reachable1 = TestUtil.encodeBlock(Lists.newArrayList(6, 15), null, true);
+    byte[] rootBlock = Helper.encodeBlock(Lists.newArrayList(6, 15), new byte[2], false);
+    byte[] reachable1 = Helper.encodeBlock(Lists.newArrayList(6, 15), null, true);
     byte[] unreachable = expectedMessage.getBytes();
-    byte[] reachable2 = TestUtil.encodeBlock(Lists.newArrayList(6, 15, 15), null, false);
+    byte[] reachable2 = Helper.encodeBlock(Lists.newArrayList(6, 15, 15), null, false);
 
-    byte[] data = TestUtil.encodeMemory(Lists.newArrayList(rootBlock, reachable1, unreachable, reachable2));
+    byte[] data = Helper.encodeMemory(Lists.newArrayList(rootBlock, reachable1, unreachable, reachable2));
 
     Memory memory = new MemoryScanner(data).scan();
     Assert.assertEquals(19, memory.data.length);

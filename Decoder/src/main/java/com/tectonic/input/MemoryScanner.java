@@ -1,6 +1,6 @@
 package com.tectonic.input;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.tectonic.decode.VarIntDecoder;
 import com.tectonic.domain.Block;
 import com.tectonic.domain.Memory;
 import com.tectonic.domain.VarInt;
@@ -18,36 +18,6 @@ public class MemoryScanner {
 
   public MemoryScanner(final byte[] data) {
     this.data = data;
-  }
-
-  @VisibleForTesting
-  VarInt decodeVarint(final int offset) {
-    //find varint bytes
-    byte moreMask = (byte) 0B1000_0000;
-    byte varIntValueMask = (byte) 0B0111_1111;
-    List<Byte> varIntValueBytes = new ArrayList<>();
-    boolean hasMore = true;
-    int currIdx = 0;
-    while (hasMore) {
-      byte currByte = data[offset + currIdx];
-      hasMore = (currByte & moreMask) == moreMask;
-      varIntValueBytes.add((byte)(currByte & varIntValueMask));
-      currIdx++;
-    }
-    assert varIntValueBytes.size() > 0 && varIntValueBytes.size() <= 8 : "A varint has between 0 and 8 bytes";
-    assert currIdx == varIntValueBytes.size();
-    //extract number from bytes
-    int value = 0;
-    for (int i = 0; i < varIntValueBytes.size(); i++) {
-      byte byteVal = varIntValueBytes.get(i);
-      assert byteVal >=0;
-
-      long shifted = ((long) byteVal) << 7 * i;
-      assert shifted >=0;
-
-      value += shifted;
-    }
-    return new VarInt(value, varIntValueBytes.size());
   }
 
   public Memory scan() {
@@ -92,7 +62,7 @@ public class MemoryScanner {
   }
 
   private Block scanBlock(final int offset) {
-    VarInt blockLength = decodeVarint(offset);
+    VarInt blockLength = VarIntDecoder.decodeVarint(data, offset);
     assert blockLength.value >= 1 && blockLength.value <= data.length;
 
     if (blockLength.value == blockLength.length) { //empty block: no pointers or payload.
@@ -105,7 +75,7 @@ public class MemoryScanner {
 
     //scan pointers until we reach the zero byte, or the end of block (may not be a zero byte if there's no payload)
     while (scannedLength < blockLength.value) {
-      VarInt pointer = decodeVarint(offset + scannedLength);
+      VarInt pointer = VarIntDecoder.decodeVarint(data,offset + scannedLength);
       assert pointer.value < data.length;
 
       scannedLength += pointer.length;
