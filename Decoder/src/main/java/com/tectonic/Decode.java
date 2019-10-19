@@ -6,11 +6,11 @@ import com.tectonic.input.MemoryScanner;
 
 import java.io.IOException;
 
-public class Runner {
+public class Decode {
 
   public static void main(String[] args) throws IOException {
 
-    String file = Runner.class.getClassLoader().getResource("hello.bin").getFile();
+    String file = Decode.class.getClassLoader().getResource(args[0]).getFile();
     byte[] data = new InputReader(file).read();
     MemoryScanner memoryScanner = new MemoryScanner(data);
     Memory memory = memoryScanner.scan();

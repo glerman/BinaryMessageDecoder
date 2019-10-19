@@ -1,9 +1,8 @@
 package com.tectonic.input;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
+import com.tectonic.domain.Block;
 import com.tectonic.domain.Memory;
-import com.tectonic.domain.RawBlock;
 import com.tectonic.domain.VarInt;
 
 import java.util.ArrayList;
@@ -53,17 +52,17 @@ public class MemoryScanner {
 
   public Memory scan() {
 
-    final List<RawBlock> reachablesSorted = findReachableBlocksSorted();
+    final List<Block> reachablesSorted = findReachableBlocksSorted();
     assert reachablesSorted.size() > 0 : "Must contain root block";
     assert reachablesSorted.stream().mapToInt(b -> b.length).sum() <= data.length : "Reachable blocks length can't be more than memory length";
     String message = findMessage(reachablesSorted);
 
-    return new Memory(data, reachablesSorted, Lists.newArrayList(), message);
+    return new Memory(data, reachablesSorted, message);
   }
 
-  private String findMessage(final List<RawBlock> reachablesSorted) {
-    RawBlock currReachable;
-    RawBlock nextReachable;
+  private String findMessage(final List<Block> reachablesSorted) {
+    Block currReachable;
+    Block nextReachable;
     StringBuilder messageBuilder = new StringBuilder();
     //Find unused between reachable
     for(int i = 0; i < reachablesSorted.size() - 1; i++) {
@@ -92,13 +91,13 @@ public class MemoryScanner {
     }
   }
 
-  private RawBlock scanBlock(final int offset) {
+  private Block scanBlock(final int offset) {
     VarInt blockLength = decodeVarint(offset);
     assert blockLength.value >= 1 && blockLength.value <= data.length;
 
     if (blockLength.value == blockLength.length) { //empty block: no pointers or payload.
       assert blockLength.value == 1 : "Expecting the length of an empty block to be 1";
-      return new RawBlock(offset, blockLength, Collections.emptyList(), null);
+      return new Block(offset, blockLength, Collections.emptyList(), null);
     }
     int scannedLength = blockLength.length;
 
@@ -117,44 +116,25 @@ public class MemoryScanner {
       pointers.add(pointer);
     }
     if (scannedLength == blockLength.value) { //no payload
-      return new RawBlock(offset, blockLength, pointers, null);
+      return new Block(offset, blockLength, pointers, null);
 
     } else if (scannedLength < blockLength.value) { //has payload
-      return new RawBlock(offset, blockLength, pointers, scannedLength);
+      return new Block(offset, blockLength, pointers, scannedLength);
 
     } else {
       throw new IllegalStateException("Scanned more than block size for block at offset " + offset);
     }
   }
 
-  private List<RawBlock> findReachableBlocksSorted() {
+  private List<Block> findReachableBlocksSorted() {
 
-    List<RawBlock> reachables = dfsWithoutRecursion();
+    List<Block> reachables = dfs();
     Collections.sort(reachables);
     return reachables;
   }
 
-//  private List<RawBlock> dfs() {
-//    Set<Integer> visitedOffsets = new HashSet<>();
-//    List<RawBlock> reachables = new ArrayList<>();
-//    dfsRecursive(0, visitedOffsets, reachables);
-//    return reachables;
-//  }
-//
-//  private void dfsRecursive(int offset, Set<Integer> visitedOffsets, List<RawBlock> reachables) {
-//    visitedOffsets.add(offset);
-//    RawBlock currBlock = scanBlock(offset);
-//    reachables.add(currBlock);
-//
-//    for (VarInt pointer : currBlock.getPointers()) {
-//      if (!visitedOffsets.contains(pointer.value)) {
-//        dfsRecursive(pointer.value, visitedOffsets, reachables);
-//      }
-//    }
-//  }
-
-  private List<RawBlock> dfsWithoutRecursion() {
-    List<RawBlock> reachables = new ArrayList<>();
+  private List<Block> dfs() {
+    List<Block> reachables = new ArrayList<>();
     Stack<Integer> stack = new Stack<>();
     Set<Integer> visitedOffsets = new HashSet<>();
     stack.push(0);
@@ -162,15 +142,14 @@ public class MemoryScanner {
     while (!stack.isEmpty()) {
       int offset = stack.pop();
 
-
-      RawBlock currBlock = scanBlock(offset);
+      Block currBlock = scanBlock(offset);
       reachables.add(currBlock);
 
-      for (VarInt pointer : currBlock.getPointers()) {
-        if (!visitedOffsets.contains(pointer.value)) {
-          stack.push(pointer.value);
+      for (Integer pointer : currBlock.getPointerIntegers()) {
+        if (!visitedOffsets.contains(pointer)) {
+          stack.push(pointer);
         }
-        visitedOffsets.add(pointer.value);
+        visitedOffsets.add(pointer);
       }
     }
     return reachables;

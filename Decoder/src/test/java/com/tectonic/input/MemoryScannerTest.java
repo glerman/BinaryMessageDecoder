@@ -2,7 +2,7 @@ package com.tectonic.input;
 
 import com.google.common.collect.Lists;
 import com.tectonic.domain.Memory;
-import com.tectonic.domain.RawBlock;
+import com.tectonic.domain.Block;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -21,7 +21,6 @@ public class MemoryScannerTest {
     Assert.assertEquals(1, memory.root.length);
     Assert.assertEquals(0, memory.root.offset);
     Assert.assertNull(memory.root.payloadOffset);
-    Assert.assertNull(memory.root.payloadLength);
     Assert.assertTrue(memory.root.getPointers().isEmpty());
   }
 
@@ -34,7 +33,6 @@ public class MemoryScannerTest {
     Assert.assertEquals(2, memory.root.length);
     Assert.assertEquals(0, memory.root.offset);
     Assert.assertNull(memory.root.payloadOffset);
-    Assert.assertNull(memory.root.payloadLength);
     Assert.assertTrue(memory.root.getPointers().isEmpty());
   }
 
@@ -47,7 +45,6 @@ public class MemoryScannerTest {
     Assert.assertEquals(memory.data, rootBlock);
     Assert.assertEquals(memory.root.length, rootBlock.length);
     Assert.assertEquals(Collections.emptyList(), memory.root.getPointers());
-    Assert.assertEquals(5, memory.root.payloadLength.intValue());
     Assert.assertEquals(2, memory.root.payloadOffset.intValue());
 
     byte[] actualPayload = Arrays.copyOfRange(rootBlock, memory.root.payloadOffset, rootBlock.length);
@@ -68,7 +65,6 @@ public class MemoryScannerTest {
     Assert.assertEquals(pointers, memory.root.getPointerIntegers());
     Assert.assertEquals(2, memory.blockCount());
 
-    Assert.assertEquals(Collections.emptyList(), memory.getUnreachableBlocks());
     Assert.assertEquals(2, memory.getReachableBlocks().size());
   }
 
@@ -87,13 +83,11 @@ public class MemoryScannerTest {
     Assert.assertEquals(pointers, memory.root.getPointerIntegers());
     Assert.assertEquals(2, memory.blockCount());
 
-    Assert.assertEquals(Collections.emptyList(), memory.getUnreachableBlocks());
     Assert.assertEquals(2, memory.getReachableBlocks().size());
 
-    RawBlock actualSecondBlock = memory.getReachableBlocks().get(1);
+    Block actualSecondBlock = memory.getReachableBlocks().get(1);
     Assert.assertEquals(pointers, actualSecondBlock.getPointerIntegers());
     Assert.assertEquals(8, actualSecondBlock.offset);
-    Assert.assertEquals(5, actualSecondBlock.payloadLength.intValue());
   }
 
   @Test
@@ -129,11 +123,11 @@ public class MemoryScannerTest {
     Assert.assertEquals(3, memory.getReachableBlocks().size());
     Assert.assertEquals(rootBlock.length, memory.getReachableBlocks().get(0).length);
 
-    RawBlock actualReachable1 = memory.getReachableBlocks().get(1);
+    Block actualReachable1 = memory.getReachableBlocks().get(1);
     Assert.assertEquals(reachable1.length, actualReachable1.length);
     Assert.assertEquals(9, actualReachable1.offset);
 
-    RawBlock actualReachable2 = memory.getReachableBlocks().get(2);
+    Block actualReachable2 = memory.getReachableBlocks().get(2);
     Assert.assertEquals(reachable2.length, actualReachable2.length);
     Assert.assertEquals(21, actualReachable2.offset);
   }
