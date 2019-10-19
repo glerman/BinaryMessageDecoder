@@ -9,16 +9,17 @@ import java.util.Objects;
 public class Memory {
 
   public final byte[] data;
+  private final String message;
   private List<RawBlock> reachableBlocks;
   private List<RawBlock> unreachableBlocks;
-//  private Block[] initBlockOrder; required?
   public RawBlock root;
 
-  public Memory(final byte[] data, final List<RawBlock> reachableBlocks, final List<RawBlock> unreachableBlocks, final RawBlock root) {
+  public Memory(final byte[] data, final List<RawBlock> reachableBlocks, final List<RawBlock> unreachableBlocks, final String message) {
     this.data = data;
     this.reachableBlocks = reachableBlocks;
     this.unreachableBlocks = unreachableBlocks;
-    this.root = root;
+    this.root = reachableBlocks.get(0);
+    this.message = message;
   }
 
   public List<RawBlock> getUnreachableBlocks() {
@@ -41,11 +42,16 @@ public class Memory {
     return Arrays.equals(data, memory.data) &&
             Objects.equals(reachableBlocks, memory.reachableBlocks) &&
             Objects.equals(unreachableBlocks, memory.unreachableBlocks) &&
+            Objects.equals(message, memory.message) &&
             Objects.equals(root, memory.root);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(data, reachableBlocks, unreachableBlocks, root);
+    return Objects.hash(data, reachableBlocks, unreachableBlocks, root, message);
+  }
+
+  public String getMessage() {
+    return message;
   }
 }

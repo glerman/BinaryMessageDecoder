@@ -17,9 +17,18 @@ public class VarIntDecodeTest {
 
   @Test
   public void testEncodeDecode() throws Exception {
+
+    byte[] data = new byte[4];
+    Assert.assertEquals(0, new MemoryScanner(data).decodeVarint(0).value);
+    data[0] = 57;
+    Assert.assertEquals(57, new MemoryScanner(TestUtil.encodeVarInt(57)).decodeVarint(0).value);
     Assert.assertEquals(4, new MemoryScanner(TestUtil.encodeVarInt(4)).decodeVarint(0).value);
     Assert.assertEquals(8, new MemoryScanner(TestUtil.encodeVarInt(8)).decodeVarint(0).value);
     Assert.assertEquals(64, new MemoryScanner(TestUtil.encodeVarInt(64)).decodeVarint(0).value);
+    Assert.assertEquals(13, new MemoryScanner(TestUtil.encodeVarInt(13)).decodeVarint(0).value);
+    Assert.assertEquals(17, new MemoryScanner(TestUtil.encodeVarInt(17)).decodeVarint(0).value);
+    Assert.assertEquals(57, new MemoryScanner(TestUtil.encodeVarInt(57)).decodeVarint(0).value);
+    Assert.assertEquals(22, new MemoryScanner(TestUtil.encodeVarInt(22)).decodeVarint(0).value);
     Assert.assertEquals(300, new MemoryScanner(TestUtil.encodeVarInt(300)).decodeVarint(0).value);
     Assert.assertEquals(1378263, new MemoryScanner(TestUtil.encodeVarInt(1378263)).decodeVarint(0).value);
   }

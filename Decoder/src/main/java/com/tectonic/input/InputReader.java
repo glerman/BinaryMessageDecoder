@@ -17,7 +17,9 @@ public class InputReader {
 
     Path path = FileSystems.getDefault().getPath(filePath);
     System.out.println("Reading file: " + path.toString());
+
     byte[] bytes = Files.readAllBytes(path);
+
     System.out.println("Bytes in file: " + bytes.length);
     return bytes;
   }

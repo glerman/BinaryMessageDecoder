@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+
+//todo: rename to block
 public class RawBlock implements Comparable<RawBlock> {
   public final int offset;
   public final Integer payloadOffset;
-  public final Integer payloadLength;
+  public final Integer payloadLength; //todo: remove
   public final int length;
   private final List<VarInt> pointers;
 

@@ -1,6 +1,7 @@
 package com.tectonic.input;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.tectonic.domain.Memory;
 import com.tectonic.domain.RawBlock;
 import com.tectonic.domain.VarInt;
@@ -52,58 +53,43 @@ public class MemoryScanner {
 
   public Memory scan() {
 
-//    List<RawBlock> l = new ArrayList<>();
-//    Lists.newArrayList(24,69,120,156,170,211,214,226,237,248).forEach(offset -> l.add(scanBlock(offset)));
-
     final List<RawBlock> reachablesSorted = findReachableBlocksSorted();
     assert reachablesSorted.size() > 0 : "Must contain root block";
     assert reachablesSorted.stream().mapToInt(b -> b.length).sum() <= data.length : "Reachable blocks length can't be more than memory length";
-    final List<RawBlock> unreachableBlocks = findUnreachableBlocks(reachablesSorted);
+    String message = findMessage(reachablesSorted);
 
-    return new Memory(data, reachablesSorted, unreachableBlocks, reachablesSorted.get(0));
+    return new Memory(data, reachablesSorted, Lists.newArrayList(), message);
   }
 
-  private List<RawBlock> findUnreachableBlocks(final List<RawBlock> reachablesSorted) {
-    List<RawBlock> unreachables = new ArrayList<>();
+  private String findMessage(final List<RawBlock> reachablesSorted) {
     RawBlock currReachable;
     RawBlock nextReachable;
-
-    //Find unreachable between reachable
+    StringBuilder messageBuilder = new StringBuilder();
+    //Find unused between reachable
     for(int i = 0; i < reachablesSorted.size() - 1; i++) {
       currReachable = reachablesSorted.get(i);
       nextReachable = reachablesSorted.get(i + 1);
       int expectedNextReachableOffset = currReachable.offset + currReachable.length;
 
       if (expectedNextReachableOffset < nextReachable.offset) {
-        RawBlock unreachable = scanBlock(expectedNextReachableOffset);
-        unreachables.add(unreachable);
-        int nextOffset = unreachable.offset + unreachable.length;
-
-        while (nextOffset < nextReachable.offset) {
-          unreachable = scanBlock(nextOffset);
-          unreachables.add(unreachable);
-          nextOffset = unreachable.offset + unreachable.length;
-        }
-        assert nextOffset == nextReachable.offset;
+        scanMessage(messageBuilder, expectedNextReachableOffset, nextReachable.offset);
       } else {
         assert expectedNextReachableOffset == nextReachable.offset;
       }
     }
-    //Find unreachable after reachable
-    int offset = totalBlocksLength(reachablesSorted, unreachables);
+    //Find unused after reachable
+    int reachableBlocksLength = reachablesSorted.stream().mapToInt(block -> block.length).sum();
+    int messageOffset = reachableBlocksLength + messageBuilder.length();
+    scanMessage(messageBuilder, messageOffset, data.length);
 
-    while (offset < data.length) {
-      RawBlock unreachable = scanBlock(offset);
-      unreachables.add(unreachable);
-      offset += unreachable.length;
-    }
-    assert offset == data.length : "Entire memory needs to be scanned. Scanned " + offset;
-    return unreachables;
+    return messageBuilder.toString();
   }
 
-  private int totalBlocksLength(List<RawBlock> x, List<RawBlock> y) {
-    return x.stream().mapToInt(b -> b.length).sum() +
-            y.stream().mapToInt(b -> b.length).sum();
+  private void scanMessage(final StringBuilder sb, int messageOffset, int messageEnd) {
+    while (messageOffset < messageEnd) {
+      sb.append((char) data[messageOffset]);
+      messageOffset++;
+    }
   }
 
   private RawBlock scanBlock(final int offset) {
