@@ -2,7 +2,7 @@ package com.tectonic;
 
 import com.tectonic.domain.Memory;
 import com.tectonic.input.InputReader;
-import com.tectonic.input.MemoryScanner;
+import com.tectonic.decode.MemoryScanner;
 
 import java.io.IOException;
 

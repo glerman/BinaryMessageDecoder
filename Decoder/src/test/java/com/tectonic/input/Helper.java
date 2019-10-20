@@ -1,4 +1,4 @@
-package com.tectonic;
+package com.tectonic.input;
 
 
 import com.google.common.annotations.VisibleForTesting;

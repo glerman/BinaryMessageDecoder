@@ -1,4 +1,4 @@
-package com.tectonic.input;
+package com.tectonic.decode;
 
 import com.tectonic.decode.VarIntDecoder;
 import com.tectonic.domain.Block;

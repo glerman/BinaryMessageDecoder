@@ -1,7 +1,7 @@
-package com.tectonic.input;
+package com.tectonic.decode;
 
 import com.google.common.collect.Lists;
-import com.tectonic.Helper;
+import com.tectonic.input.Helper;
 import com.tectonic.domain.Memory;
 import com.tectonic.domain.Block;
 import org.junit.Assert;
