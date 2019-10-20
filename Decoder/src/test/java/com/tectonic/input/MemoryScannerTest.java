@@ -38,7 +38,7 @@ public class MemoryScannerTest {
   }
 
   @Test
-  public void testPayLoadBock() throws Exception {
+  public void testPayloadBock() throws Exception {
     byte[] payload = "hello".getBytes();
     byte[] rootBlock = Helper.encodeBlock(null, payload, false);
     Memory memory = new MemoryScanner(rootBlock).scan();

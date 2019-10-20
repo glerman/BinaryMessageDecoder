@@ -7,7 +7,7 @@ import org.junit.Test;
 public class VarIntDecoderTest {
 
   @Test
-  public void testEncodeDecode() throws Exception {
+  public void testDecode() throws Exception {
 
     Assert.assertEquals(
             new VarInt(0, 1),
