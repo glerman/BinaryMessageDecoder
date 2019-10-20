@@ -1,12 +1,11 @@
 package com.tectonic.domain;
 
-import com.google.common.collect.ImmutableList;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Block implements Comparable<Block> {
+
   public final int offset;
   public final Integer payloadOffset;
   public final int length;
@@ -48,7 +47,7 @@ public class Block implements Comparable<Block> {
   }
 
   public List<VarInt> getPointers() {
-    return ImmutableList.copyOf(pointers);
+    return pointers;
   }
 
   public List<Integer> getPointerIntegers() {

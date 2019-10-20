@@ -7,9 +7,9 @@ import java.util.Objects;
 public class Memory {
 
   public final byte[] data;
+  public final Block root;
   private final String message;
   private List<Block> reachableBlocks;
-  public Block root;
 
   public Memory(final byte[] data, final List<Block> reachableBlocks, final String message) {
     this.data = data;
